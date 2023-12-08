@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "ai-researcher"
+version = "0.1.0"
+description = ""
+authors = ["Samuel Lehotsky <lehotsky@atlas.sk>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+openai = "^1.3.7"
+langchain = "^0.0.347"
+python-dotenv = "^1.0.0"
+
+[tool.poetry.group.dev.dependencies]
+isort = "^5.12.0"
+black = {extras = ["d"], version = "^23.11.0"}
+flake8 = "^6.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 80
+
+[tool.isort]
+profile = "black"
+line_length = 80
+
+[tool.poetry.scripts]
+start = 'ai_researcher.main:main'

@@ -1,0 +1,7 @@
+[flake8]
+max-line-length = 80
+
+# Ignored errors:
+# E203 - Conflicts with styles from Black
+# E501 - Line too long - managed by Black
+ignore = E203,E501
