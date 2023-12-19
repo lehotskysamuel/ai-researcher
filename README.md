@@ -2,7 +2,7 @@
 
 ## Dependencies
 
-- Python 3.12
+- Python 3.10.5
 - Poetry 1.7.1
 
 
@@ -29,18 +29,16 @@
 
 ## Archive
 
-### Original Installation Steps
+### Environment Installation Steps
 
-- Install python 3.12 (using pyenv or by another way)
+- Install pyenv
+  - Follow steps for Windows here: [https://github.com/pyenv-win/pyenv-win](https://github.com/pyenv-win/pyenv-win)
+- Install python 3.10
+  - `pyenv install 3.10.5`
+  - `pyenv local 3.10.5`
 - Install pipx (npx equivalent)
-  - Follow steps for your OS here: [https://github.com/pypa/pipx](https://github.com/pypa/pipx)
+  - `scoop install pipx`
+  - Or follow steps for your OS here: [https://github.com/pypa/pipx](https://github.com/pypa/pipx)
 - Install Poetry (yarn equivalent)
   - `pipx install poetry`
-- Install Dev Tools
-  - `poetry add --dev black`
-  - `poetry add --dev isort`
-  - `poetry add --dev flake8`
-- Install Libs
-  - `poetry add openai`
-  - `poetry add langchain`
-  - `poetry add python-dotenv`
+- `poetry install`
