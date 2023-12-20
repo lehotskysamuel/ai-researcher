@@ -1,3 +1,4 @@
+import os
 from typing import Dict, Iterator, List, Union
 
 import ebooklib
@@ -24,7 +25,7 @@ class EPubLoader(BaseLoader):
         authors (List[Dict[str, Union[str, None]]]): A list of creators and contributors of the eBook.
 
     Example usage:
-        epub_loader = EPubLoader('/path/to/ebook.epub')
+        epub_loader = EPubLoader('/path/to/ebook.epub', "Ebook for Dummies")
         documents = epub_loader.load()
     """
 
@@ -41,9 +42,10 @@ class EPubLoader(BaseLoader):
         """
 
         self.file_path = file_path
-        self._book = epub.read_epub(file_path)
+        self._book = epub.read_epub(file_path, options={"ignore_ncx": False})
 
         self.title = self._book.title
+        self.items_length = len(self._book.spine)
 
         creators = [
             {
@@ -91,9 +93,11 @@ class EPubLoader(BaseLoader):
                 metadata: Dict[str, Union[str, None]] = {
                     "book_title": self.title,
                     "authors": self.authors,
-                    "source": self.file_path,
-                    "chapter_id": item_id,
-                    "chapter_number": index + 1,
+                    "source_type": "epub",
+                    "source": os.path.basename(self.file_path),
+                    "item_id": item_id,
+                    "item_position": index,
+                    "total_items": self.items_length,
                 }
 
                 yield Document(
