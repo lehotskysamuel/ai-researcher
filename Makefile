@@ -1,10 +1,6 @@
-.PHONY: install
-install:
-	poetry install
-
-.PHONY: start
-start:
-	poetry run start
+.PHONY: proxy
+proxy:
+	poetry run uvicorn ai_researcher.bin.enhanced_inference_proxy:app --reload --port 4242
 
 .PHONY: format
 format:

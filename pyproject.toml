@@ -39,4 +39,5 @@ profile = "black"
 line_length = 80
 
 [tool.poetry.scripts]
-start = 'ai_researcher.main:main'
+start = 'ai_researcher.bin.main:main'
+proxy = 'ai_researcher.bin.enhanced_inference_proxy:start_webserver'

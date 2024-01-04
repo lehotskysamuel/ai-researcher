@@ -8,10 +8,12 @@
 
 ## Useful Commands
 
-- `make start` - run the main app
-- `make install` - install dependencies
 - `make format` - run formatters
 - `make lint` - run linting
+
+Main Apps:
+- `poetry run proxy` - run the enhanced inference proxy for TypingMind
+- `poetry run start` - run the main app
 
 
 ### Local Dev Setup
