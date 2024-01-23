@@ -166,3 +166,6 @@ temp
 
 # data directory used as blob database
 data
+
+# workspace for codegen agents
+.workspace
