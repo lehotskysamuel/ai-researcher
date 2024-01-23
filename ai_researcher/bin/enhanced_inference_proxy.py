@@ -13,13 +13,15 @@ from starlette.responses import (
     Response,
 )
 
+from ai_researcher.openai_models import OpenAiModels
 from ai_researcher.utils import debug
 
 load_dotenv()
 # TODO Sam - key should come from typingmind
 openai_api_key = os.getenv("OPENAI_KEY")
+openai_org_id = os.getenv("OPENAI_ORG_ID")
 
-client_oai = AsyncOpenAI(api_key=openai_api_key)
+client_oai = AsyncOpenAI(api_key=openai_api_key, organization=openai_org_id)
 
 app = FastAPI()
 app.add_middleware(
@@ -89,7 +91,7 @@ async def proxy_inference(request: Request):
 
     raw_response = await client_oai.chat.completions.with_raw_response.create(
         **completion_args,
-        model="gpt-4-1106-preview",
+        model=OpenAiModels.GPT_4_TURBO.value,
     )
 
     if request_body.get("stream") is True:
