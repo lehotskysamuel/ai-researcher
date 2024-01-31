@@ -6,7 +6,7 @@ from langchain_community.chat_models import ChatOpenAI
 
 
 class OpenAiModels(Enum):
-    GPT_4_TURBO = "gpt-4-1106-preview"
+    GPT_4_TURBO = "gpt-4-0125-preview"
     GPT_4_VISION = "gpt-4-vision-preview"
     GPT_3_5_TURBO = "gpt-3.5-turbo-1106"
 
