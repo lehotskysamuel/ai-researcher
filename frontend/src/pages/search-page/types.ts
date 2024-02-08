@@ -4,13 +4,20 @@ import redditLogo from "super-tiny-icons/images/svg/reddit.svg";
 import duckDuckGoLogo from "super-tiny-icons/images/svg/duckduckgo.svg";
 import { Immutable } from "immer";
 
-type LoadingState = "idle" | "loading" | "error" | "success";
+// todo global types
+type LoadingState = "idle" | "loading" | "success" | "error";
 
 export enum SearchEngineEnum {
   Google = "google",
   Bing = "bing",
   DuckDuckGo = "duckduckgo",
   Reddit = "reddit",
+}
+
+export function parseSearchEngine(str: string): SearchEngineEnum | undefined {
+  return Object.values(SearchEngineEnum).find(
+    (searchEngine) => searchEngine.toLowerCase() === str.toLowerCase()
+  );
 }
 
 type SearchEngineDisplayData = {
@@ -39,7 +46,7 @@ export const SEARCH_ENGINES: Immutable<
   },
 };
 
-type SearchConfig = {
+export type SearchConfig = {
   searchQueries: string[];
   searchEngineConfigs: SearchEngineConfig[];
 };
@@ -50,16 +57,40 @@ export type SearchEngineConfig = {
   maxResults: number;
 };
 
+export type SearchResult = {
+  enabled: boolean;
+  url: string;
+  title: string;
+  searchEngines: SearchEngineEnum[];
+  description: string;
+  details: SearchResultDetails;
+};
+
+export type SearchResultDetails =
+  | {
+      state: "idle" | "loading";
+    }
+  | {
+      state: "success";
+      htmlPreview: string;
+    }
+  | {
+      state: "error";
+      error: string;
+    };
+
 export type SearchPageState = Immutable<{
   error: string | null;
   configTemplateState: LoadingState;
   searchConfig: SearchConfig;
+  searchState: LoadingState;
+  searchResults: SearchResult[];
 }>;
 
 export type SearchPageAction =
   | { type: "SUBMIT_USER_QUERY"; userQuery: string }
   | { type: "SUBMIT_USER_QUERY_FAILED"; error: Error }
-  | { type: "UPDATE_SEARCH_QUERIES"; searchQueries: string[] }
+  | { type: "UPDATE_ALL_SEARCH_QUERIES"; searchQueries: string[] }
   | { type: "CREATE_SEARCH_QUERY" }
   | { type: "UPDATE_SEARCH_QUERY"; index: number; searchQuery: string }
   | { type: "DELETE_SEARCH_QUERY"; index: number }
@@ -75,4 +106,15 @@ export type SearchPageAction =
   | {
       type: "UPDATE_SEARCH_ENGINE_CONFIGS";
       maxResults: number;
+    }
+  | { type: "SEARCH" }
+  | { type: "SEARCH_FAILED"; error: Error }
+  | {
+      type: "UPDATE_ALL_SEARCH_RESULTS";
+      searchResults: SearchResult[];
+    }
+  | {
+      type: "UPDATE_SEARCH_RESULT";
+      index: number;
+      searchResult: SearchResult;
     };

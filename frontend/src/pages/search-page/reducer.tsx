@@ -14,6 +14,8 @@ export const initialState: SearchPageState = {
       })
     ),
   },
+  searchState: "idle",
+  searchResults: [],
   error: null,
 };
 
@@ -30,7 +32,7 @@ export function searchPageReducer(
       draft.error = action.error.message;
       draft.configTemplateState = "error";
       break;
-    case "UPDATE_SEARCH_QUERIES":
+    case "UPDATE_ALL_SEARCH_QUERIES":
       draft.configTemplateState = "success";
       draft.searchConfig.searchQueries = action.searchQueries;
       break;
@@ -43,19 +45,33 @@ export function searchPageReducer(
     case "DELETE_SEARCH_QUERY":
       draft.searchConfig.searchQueries.splice(action.index, 1);
       break;
-    case "UPDATE_SEARCH_ENGINE_CONFIG":
-      draft.searchConfig.searchEngineConfigs[action.index] =
-        action.searchEngineConfig;
-      break;
     case "SELECT_SEARCH_ENGINE_CONFIGS":
       draft.searchConfig.searchEngineConfigs.forEach((sec, index) => {
         sec.enabled = action.indexes.includes(index);
       });
       break;
+    case "UPDATE_SEARCH_ENGINE_CONFIG":
+      draft.searchConfig.searchEngineConfigs[action.index] =
+        action.searchEngineConfig;
+      break;
     case "UPDATE_SEARCH_ENGINE_CONFIGS":
       draft.searchConfig.searchEngineConfigs.forEach((sec) => {
         sec.maxResults = action.maxResults;
       });
+      break;
+    case "UPDATE_ALL_SEARCH_RESULTS":
+      draft.searchResults = action.searchResults;
+      break;
+    case "UPDATE_SEARCH_RESULT":
+      draft.searchResults[action.index] = action.searchResult;
+      break;
+    case "SEARCH":
+      draft.searchState = "loading";
+      break;
+    case "SEARCH_FAILED":
+      console.error(action.error);
+      draft.error = action.error.message;
+      draft.searchState = "error";
       break;
     default:
       assertNever(action);

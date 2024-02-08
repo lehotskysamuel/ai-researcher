@@ -11,8 +11,8 @@ import { createSequenceArray } from "@/lib/utils";
 import { Pencil, Plus, Search, Trash } from "lucide-react";
 import { useId, useState } from "react";
 import { useSearchPageDispatch, useSearchPageState } from "./context";
-import { SEARCH_ENGINES, SearchEngineConfig } from "./types";
 import { Step3Ui } from "./step3-ui";
+import { SEARCH_ENGINES, SearchEngineConfig } from "./types";
 
 const MIN_RESULTS = 1;
 const MAX_RESULTS = 20;
@@ -125,7 +125,7 @@ export function Step2Ui() {
         />
       </div>
 
-      <Button className="my-4">
+      <Button className="my-4" onClick={() => dispatch({ type: "SEARCH" })}>
         <Search size={16} className="mr-2" />
         Search
       </Button>

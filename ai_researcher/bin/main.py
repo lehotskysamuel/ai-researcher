@@ -102,20 +102,20 @@ def step2_endpoint(body: Step2Input) -> Step2Output:
     results = [
         {
             "search_engine": "Google",
-            "title": "Example Title",
+            "title": "Example Title 1",
+            "url": "http://example.com",
+            "description": "Example Description. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut tempus purus at lorem.",
+        },
+        {
+            "search_engine": "Bing",
+            "title": "Example Title 2",
             "url": "http://example.com",
             "description": "Example Description. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut tempus purus at lorem.",
         },
         {
             "search_engine": "Google",
-            "title": "Example Title",
-            "url": "http://example.com",
-            "description": "Example Description. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut tempus purus at lorem.",
-        },
-        {
-            "search_engine": "Google",
-            "title": "Example Title",
-            "url": "http://example.com",
+            "title": "Example Title 3",
+            "url": "http://example2.com",
             "description": "Example Description. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut tempus purus at lorem.",
         },
     ]

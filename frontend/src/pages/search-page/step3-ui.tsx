@@ -20,48 +20,48 @@ export function Step3Ui() {
     <>
       <TypographyH2>
         <span className="text-muted-foreground">Step 3 / </span>Select Search
-        Results to Load
+        Results to Download
       </TypographyH2>
       <div className="flex flex-row flex-wrap">
         <SearchResult
           selected={true}
-          title="Card Title"
           url="www.example.com"
-          description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
-          elementum, orci at volutpat viverra, risus purus aliquet nibh, in
-          lacinia libero lorem in est."
-          searchResultState={SearchResultState.NONE}
+          title="Card Title"
           searchEngines={[SearchEngineEnum.Google, SearchEngineEnum.Bing]}
-        />
-        <SearchResult
-          selected={true}
-          title="Card Title"
-          url="www.example.com"
           description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
           elementum, orci at volutpat viverra, risus purus aliquet nibh, in
           lacinia libero lorem in est."
-          searchResultState={SearchResultState.NONE}
+          state={SearchResultState.NONE}
+        />
+        <SearchResult
+          selected={true}
+          url="www.example.com"
+          title="Card Title"
           searchEngines={[SearchEngineEnum.Google]}
-        />
-        <SearchResult
-          selected={true}
-          title="Card Title"
-          url="www.example.com"
           description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
           elementum, orci at volutpat viverra, risus purus aliquet nibh, in
           lacinia libero lorem in est."
-          searchResultState={SearchResultState.SUCCESS}
+          state={SearchResultState.NONE}
+        />
+        <SearchResult
+          selected={true}
+          url="www.example.com"
+          title="Card Title"
           searchEngines={[SearchEngineEnum.Google, SearchEngineEnum.DuckDuckGo]}
-        />
-        <SearchResult
-          selected={true}
-          title="Card Title"
-          url="www.example.com"
           description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
           elementum, orci at volutpat viverra, risus purus aliquet nibh, in
           lacinia libero lorem in est."
-          searchResultState={SearchResultState.FAILED}
+          state={SearchResultState.SUCCESS}
+        />
+        <SearchResult
+          selected={true}
+          url="www.example.com"
+          title="Card Title"
           searchEngines={[SearchEngineEnum.Google]}
+          description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
+          elementum, orci at volutpat viverra, risus purus aliquet nibh, in
+          lacinia libero lorem in est."
+          state={SearchResultState.FAILED}
         />
       </div>
 
@@ -95,12 +95,12 @@ enum SearchResultState {
 }
 
 interface SearchResultProps {
+  selected: boolean;
   url: string;
   title: string;
-  description: string;
-  selected: boolean;
-  searchResultState: SearchResultState;
   searchEngines: Array<SearchEngineEnum>;
+  description: string;
+  state: SearchResultState;
 }
 
 const SearchResult = (props: SearchResultProps) => {
@@ -142,20 +142,22 @@ const SearchResult = (props: SearchResultProps) => {
           </CardDescription>
         </CardHeader>
 
-        <CardFooter>
-          {props.searchResultState === SearchResultState.SUCCESS && (
-            <div className="w-full flex items-center justify-between">
-              <span className="text-green-500">Successful</span>
-              <Button variant={"secondary"}>Preview</Button>
-            </div>
-          )}
-          {props.searchResultState === SearchResultState.FAILED && (
-            <div className="w-full flex items-center justify-between">
-              <span className="text-red-500 font-bold">Failed!</span>
-              <Button variant={"secondary"}>Details</Button>
-            </div>
-          )}
-        </CardFooter>
+        {props.state !== SearchResultState.NONE && (
+          <CardFooter>
+            {props.state === SearchResultState.SUCCESS && (
+              <div className="w-full flex items-center justify-between">
+                <span className="text-green-500">Successful</span>
+                <Button variant={"secondary"}>Preview</Button>
+              </div>
+            )}
+            {props.state === SearchResultState.FAILED && (
+              <div className="w-full flex items-center justify-between">
+                <span className="text-red-500 font-bold">Failed!</span>
+                <Button variant={"secondary"}>Details</Button>
+              </div>
+            )}
+          </CardFooter>
+        )}
       </Card>
     </div>
   );
