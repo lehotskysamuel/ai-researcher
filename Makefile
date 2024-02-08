@@ -6,6 +6,10 @@ install:
 start:
 	poetry run start
 
+.PHONY: dev
+dev:
+	poetry run uvicorn --host 127.0.0.1 --port 8080 --reload ai_researcher.bin.main:app
+
 .PHONY: format
 format:
 	poetry run isort .

@@ -59,6 +59,7 @@ function SearchInput(props: {
         onChange={(e) => setUserQuery(e.target.value)}
       />
 
+      {/* todo disable on load */}
       <Button onClick={() => props.onSubmit(userQuery)}>
         {props.isLoading ? (
           <Spinner size={16} className="mr-2" />

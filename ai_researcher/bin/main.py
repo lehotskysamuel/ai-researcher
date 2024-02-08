@@ -1,12 +1,13 @@
 import os
+import random
 import time
-from typing import List
+from typing import List, Union
 
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 
 from ai_researcher.utils import debug
 
@@ -58,7 +59,28 @@ class Step2Output(BaseModel):
     search_results: List[SearchResult]
 
 
+# TODO Sam - Embedding stranok by mal vygenerovat unikatne ID toho searchu (a dat tam aj datum). Potom sa mozem s tymto ID referencovat na tento search a chatovat vyhradne so strankami z tohto searchu (keby som nahodou nechcel chatovat s celou knowledge base)
 # Step 3
+class Step3Input(BaseModel):
+    url: str
+
+
+class Step3SuccessOutput(BaseModel):
+    success: bool = Field(default=True)
+    content: str
+
+    @field_validator("success")
+    def set_success_to_true(cls, v):
+        return True
+
+
+class Step3FailureOutput(BaseModel):
+    success: bool = Field(default=False)
+    error: str
+
+    @field_validator("success")
+    def set_success_to_false(cls, v):
+        return False
 
 
 @app.post("/api/search-wizard/step1")
@@ -100,10 +122,15 @@ def step2_endpoint(body: Step2Input) -> Step2Output:
     return Step2Output(search_results=results)
 
 
-# @app.post("/api/search-wizard/step3")
-# def step3_endpoint(body: Step3Input):
-#     validation_results = [True for _ in results]
-#     return validation_results
+@app.post("/api/search-wizard/step3")
+def step3_endpoint(
+    body: Step3Input,
+) -> Union[Step3SuccessOutput, Step3FailureOutput]:
+    success = random.randint(0, 1) == 1
+    if success:
+        return Step3SuccessOutput(content="<strong>Successful</strong>")
+    else:
+        return Step3FailureOutput(error="Network Error: Stack trace...")
 
 
 def start_webserver():
@@ -111,7 +138,6 @@ def start_webserver():
         "ai_researcher.bin.main:app",
         host="127.0.0.1",
         port=8080,
-        reload=True,  # reloads on file changes
     )
 
 

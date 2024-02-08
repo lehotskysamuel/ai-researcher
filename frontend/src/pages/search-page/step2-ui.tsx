@@ -12,6 +12,7 @@ import { Pencil, Plus, Search, Trash } from "lucide-react";
 import { useId, useState } from "react";
 import { useSearchPageDispatch, useSearchPageState } from "./context";
 import { SEARCH_ENGINES, SearchEngineConfig } from "./types";
+import { Step3Ui } from "./step3-ui";
 
 const MIN_RESULTS = 1;
 const MAX_RESULTS = 20;
@@ -24,7 +25,10 @@ export function Step2Ui() {
 
   return (
     <>
-      <TypographyH2>Configure Search Parameters</TypographyH2>
+      <TypographyH2>
+        <span className="text-muted-foreground">Step 2 / </span>Configure Search
+        Parameters
+      </TypographyH2>
       <TypographyH3>Configure Search Queries</TypographyH3>
       <div className="flex flex-col gap-2 list-disc">
         {state.searchConfig.searchQueries.map((sq, index) => (
@@ -126,6 +130,8 @@ export function Step2Ui() {
         Search
       </Button>
       <Loading text="Searching..." />
+
+      <Step3Ui />
     </>
   );
 }

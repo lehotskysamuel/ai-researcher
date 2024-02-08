@@ -5,8 +5,8 @@ from langchain.output_parsers.json import SimpleJsonOutputParser
 from langchain_core.documents import Document
 from langchain_core.messages import HumanMessage
 from langchain_core.prompts import (
-    SystemMessagePromptTemplate,
     ChatPromptTemplate,
+    SystemMessagePromptTemplate,
 )
 
 from ai_researcher.openai_models import gpt4

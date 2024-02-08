@@ -4,8 +4,7 @@ from enum import Enum
 import streamlit as st
 
 from ai_researcher.document_loaders.epub_loader import EPubLoader
-from ai_researcher.utils import read_raw, read_json
-
+from ai_researcher.utils import read_json, read_raw
 
 summaries_folder = "data/documents/books/summaries"
 
