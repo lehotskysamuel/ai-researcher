@@ -99,6 +99,7 @@ def step1_endpoint(body: Step1Input) -> Step1Output:
 @app.post("/api/search-wizard/step2")
 def step2_endpoint(body: Step2Input) -> Step2Output:
     debug(body)
+    time.sleep(1)
     results = [
         {
             "search_engine": "Google",
@@ -126,6 +127,7 @@ def step2_endpoint(body: Step2Input) -> Step2Output:
 def step3_endpoint(
     body: Step3Input,
 ) -> Union[Step3SuccessOutput, Step3FailureOutput]:
+    time.sleep(1)
     success = random.randint(0, 1) == 1
     if success:
         return Step3SuccessOutput(content="<strong>Successful</strong>")

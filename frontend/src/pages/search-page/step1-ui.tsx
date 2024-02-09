@@ -27,6 +27,7 @@ export function Step1Ui() {
       {state.configTemplateState === "loading" && (
         <Loading text="Generating search queries..." />
       )}
+      {state.configTemplateState === "success" && <Step2Ui />}
 
       {state.configTemplateState === "error" && (
         <Alert variant="destructive">
@@ -35,8 +36,6 @@ export function Step1Ui() {
           <AlertDescription>{state.error}</AlertDescription>
         </Alert>
       )}
-
-      {state.configTemplateState === "success" && <Step2Ui />}
     </>
   );
 }

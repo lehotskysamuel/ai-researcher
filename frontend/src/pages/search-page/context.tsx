@@ -73,8 +73,6 @@ export const SearchPageContextProvider: React.FC<React.PropsWithChildren> = ({
         }
       });
 
-      console.log("searchResults", Array.from(searchResultsMap.values()));
-
       dispatch({
         type: "UPDATE_ALL_SEARCH_RESULTS",
         searchResults: Array.from(searchResultsMap.values()),

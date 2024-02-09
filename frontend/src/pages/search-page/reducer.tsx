@@ -59,12 +59,6 @@ export function searchPageReducer(
         sec.maxResults = action.maxResults;
       });
       break;
-    case "UPDATE_ALL_SEARCH_RESULTS":
-      draft.searchResults = action.searchResults;
-      break;
-    case "UPDATE_SEARCH_RESULT":
-      draft.searchResults[action.index] = action.searchResult;
-      break;
     case "SEARCH":
       draft.searchState = "loading";
       break;
@@ -72,6 +66,25 @@ export function searchPageReducer(
       console.error(action.error);
       draft.error = action.error.message;
       draft.searchState = "error";
+      break;
+    case "UPDATE_ALL_SEARCH_RESULTS":
+      draft.searchState = "success";
+      draft.searchResults = action.searchResults;
+      break;
+    case "UPDATE_SEARCH_RESULT":
+      draft.searchResults[action.index] = action.searchResult;
+      break;
+    case "SELECT_SEARCH_RESULTS":
+      draft.searchResults.forEach((searchResult, index) => {
+        const searchResultInArray = action.indexes.includes(index);
+        if (action.operation === "set") {
+          searchResult.enabled = searchResultInArray;
+        } else {
+          if (searchResultInArray) {
+            searchResult.enabled = action.operation === "add";
+          }
+        }
+      });
       break;
     default:
       assertNever(action);

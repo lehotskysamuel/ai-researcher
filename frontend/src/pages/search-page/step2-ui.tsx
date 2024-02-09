@@ -8,11 +8,13 @@ import { Label } from "@/components/ui/label";
 import { TypographyH2, TypographyH3 } from "@/components/ui/typography";
 import { useCancelAction } from "@/lib/hooks";
 import { createSequenceArray } from "@/lib/utils";
-import { Pencil, Plus, Search, Trash } from "lucide-react";
+import { AlertCircle, Check, Pencil, Plus, Search, Trash } from "lucide-react";
 import { useId, useState } from "react";
 import { useSearchPageDispatch, useSearchPageState } from "./context";
 import { Step3Ui } from "./step3-ui";
 import { SEARCH_ENGINES, SearchEngineConfig } from "./types";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Spinner } from "@/components/custom/spinner";
 
 const MIN_RESULTS = 1;
 const MAX_RESULTS = 20;
@@ -53,7 +55,7 @@ export function Step2Ui() {
         ))}
 
         <Button
-          className="self-start py-2 px-4 my-4"
+          className="self-start py-2 px-4"
           size="sm"
           onClick={() => {
             dispatch({
@@ -108,6 +110,7 @@ export function Step2Ui() {
             });
           }}
         >
+          <Check size={16} className="mr-2" />
           Select All
         </Button>
 
@@ -126,12 +129,24 @@ export function Step2Ui() {
       </div>
 
       <Button className="my-4" onClick={() => dispatch({ type: "SEARCH" })}>
-        <Search size={16} className="mr-2" />
+        {state.searchState === "loading" ? (
+          <Spinner size={16} className="mr-2" />
+        ) : (
+          <Search size={16} className="mr-2" />
+        )}
         Search
       </Button>
-      <Loading text="Searching..." />
 
-      <Step3Ui />
+      {state.searchState === "loading" && <Loading text="Searching..." />}
+      {state.searchState === "success" && <Step3Ui />}
+
+      {state.configTemplateState === "error" && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error!</AlertTitle>
+          <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
+      )}
     </>
   );
 }

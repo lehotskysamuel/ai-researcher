@@ -34,9 +34,11 @@ interface LabeledSwitchProps
 function LabeledSwitch({ label, ...switchProps }: LabeledSwitchProps) {
   const id = useId();
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-2 ">
       <Switch id={id} {...switchProps} />
-      <Label htmlFor={id}>{label}</Label>
+      <Label className="cursor-pointer" htmlFor={id}>
+        {label}
+      </Label>
     </div>
   );
 }

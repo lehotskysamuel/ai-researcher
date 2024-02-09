@@ -5,7 +5,7 @@ import duckDuckGoLogo from "super-tiny-icons/images/svg/duckduckgo.svg";
 import { Immutable } from "immer";
 
 // todo global types
-type LoadingState = "idle" | "loading" | "success" | "error";
+export type LoadingState = "idle" | "loading" | "success" | "error";
 
 export enum SearchEngineEnum {
   Google = "google",
@@ -117,4 +117,9 @@ export type SearchPageAction =
       type: "UPDATE_SEARCH_RESULT";
       index: number;
       searchResult: SearchResult;
+    }
+  | {
+      type: "SELECT_SEARCH_RESULTS";
+      indexes: number[];
+      operation: "add" | "remove" | "set";
     };
