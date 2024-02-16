@@ -1,5 +1,4 @@
 import os
-import time
 
 import streamlit as st
 from langchain_community.callbacks import get_openai_callback
@@ -95,8 +94,11 @@ def prompt_selector():
         index=None,
         placeholder="Select a prompt...",
     )
+    prompt_text = None
 
     if selected_prompt is not None:
+        prompt_text = read_raw(os.path.join(paths.prompts, selected_prompt))
+
         modal = Modal(
             "Prompt Preview",
             key="prompt-preview-modal",
@@ -106,33 +108,36 @@ def prompt_selector():
             modal.open()
         if modal.is_open():
             with modal.container():
-                st.text(read_raw(os.path.join(paths.prompts, selected_prompt)))
+                st.text(prompt_text)
 
-    return selected_prompt
+    return prompt_text
 
 
-def summarize(selected_book, metadata, selected_prompt, start_split, end_split):
+def summarize(
+    selected_book, metadata, summary_instructions, start_split, end_split
+):
     book_folder = os.path.join(paths.splits_raw, selected_book)
 
-    documents = read_documents(book_folder, start_split, end_split)
+    documents = read_documents(book_folder, metadata["items_length"])
 
     copy_file(
         os.path.join(book_folder, "metadata.json"),
         os.path.join(paths.summary, selected_book, "metadata.json"),
     )
 
+    dump_raw(
+        summary_instructions,
+        os.path.join(paths.summary, selected_book, "prompt.txt"),
+    )
+
     progress_bar = st.progress(0)
 
-    time.sleep(1)
     with get_openai_callback() as cb:
         for i in range(start_split, end_split + 1):
             doc = documents[i]
             st.write(f"Split #{i}: In Progress...")
 
-            summarizer = ProseSummarizer(doc)
-
-            time.sleep(1)
-            continue
+            summarizer = ProseSummarizer(doc, summary_instructions)
 
             try:
                 summary = summarizer.summarize()
@@ -142,7 +147,7 @@ def summarize(selected_book, metadata, selected_prompt, start_split, end_split):
                         paths.summary, selected_book, f"summary_{i}.json"
                     ),
                 )
-                st.write(":green[Split #{i}: Successful!]")
+                st.write(f":green[Split #{i}: Successful!]")
             except OutputParserException as e:
                 dump_raw(
                     e.llm_output,
@@ -153,7 +158,7 @@ def summarize(selected_book, metadata, selected_prompt, start_split, end_split):
                     ),
                 )
                 st.write(
-                    ":orange[Split #{i}: finished with parser exception, falling back to text mode.]"
+                    f":orange[Split #{i}: finished with parser exception, falling back to text mode.]"
                 )
             except Exception as e:
                 try:
@@ -165,10 +170,10 @@ def summarize(selected_book, metadata, selected_prompt, start_split, end_split):
                             f"summary_{i}.error.json",
                         ),
                     )
-                    st.write(":red[Split #{i}: Failed, error saved!]")
+                    st.write(f":red[Split #{i}: Failed, error saved!]")
                     st.error(e)
-                except e2:
-                    st.write(":red[Split #{i}: Failed, error lost!]")
+                except Exception as e2:
+                    st.write(f":red[Split #{i}: Failed, error lost!]")
                     st.error(e)
                     st.error(e2)
                     pass
@@ -183,10 +188,10 @@ def summarize(selected_book, metadata, selected_prompt, start_split, end_split):
         st.text(cb)
 
 
-def read_documents(book_folder, start_split, end_split):
+def read_documents(book_folder, length):
     documents = []
 
-    for i in range(start_split, end_split + 1):
+    for i in range(0, length):
         doc_path = f"{book_folder}/doc_{i}.json"
         doc_json = read_json(doc_path)
         documents.append(

@@ -65,3 +65,7 @@ def dump_json(input, file_path):
 def read_json(file_path):
     with open(file_path, "r") as file:
         return json.load(file)
+
+
+def is_blank(text):
+    return text is None or text.strip() == ""

@@ -5,7 +5,7 @@ import streamlit as st
 from streamlit_modal import Modal
 
 from ai_researcher import paths
-from ai_researcher.utils import read_json, read_raw
+from ai_researcher.utils import read_json, read_raw, is_blank
 
 
 class DocStatus(Enum):
@@ -42,7 +42,7 @@ def render_summary(book_folder):
     st.markdown("## Short Summary")
     for index, (status, doc) in enumerate(documents):
         if status == DocStatus.DICT and doc["relevant"]:
-            if doc["title"] is not None:
+            if not is_blank(doc["title"]):
                 st.markdown("#### " + doc["title"])
             else:
                 st.markdown("#### " + f"Document #{index}")
@@ -67,7 +67,7 @@ def render_summary(book_folder):
     st.markdown("## Full Summary")
     for index, (status, doc) in enumerate(documents):
         if status == DocStatus.DICT and doc["relevant"]:
-            if doc["title"] is not None:
+            if not is_blank(doc["title"]):
                 st.markdown("### " + doc["title"])
             else:
                 st.markdown("### " + f"Document #{index}")
@@ -98,11 +98,15 @@ def load_documents(book_folder, items_length):
             docs.append((DocStatus.DICT, doc))
         except FileNotFoundError:
             try:
-                doc = os.path.join(book_folder, f"summary_{i}.fallback.txt")
+                doc = read_raw(
+                    os.path.join(book_folder, f"summary_{i}.fallback.txt")
+                )
                 docs.append((DocStatus.TEXT, doc))
             except FileNotFoundError:
                 try:
-                    doc = os.path.join(book_folder, f"summary_{i}.error.txt")
+                    doc = read_raw(
+                        os.path.join(book_folder, f"summary_{i}.error.txt")
+                    )
                     docs.append((DocStatus.ERROR, doc))
                 except FileNotFoundError:
                     docs.append((DocStatus.MISSING, None))

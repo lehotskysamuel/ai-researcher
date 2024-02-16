@@ -10,18 +10,18 @@ from langchain_core.prompts import (
 )
 
 from ai_researcher.openai_models import gpt4
-from ai_researcher.utils import read_raw
 
 
 class ProseSummarizer:
-    def __init__(self, document: Document):
+    def __init__(self, document: Document, summary_instructions: str):
         self.document = document
+        self.summary_instructions = summary_instructions
 
     def summarize(self):
         prompt = ChatPromptTemplate.from_messages(
             [
                 SystemMessagePromptTemplate.from_template(
-                    read_raw("prompt_templates/summarizers/prose_full.txt")
+                    self.summary_instructions
                 ),
                 HumanMessage(content=self.document.page_content),
             ]
