@@ -2,11 +2,10 @@ import os
 from enum import Enum
 
 import streamlit as st
+from streamlit_modal import Modal
 
-from ai_researcher.document_loaders.epub_loader import EPubLoader
+from ai_researcher import paths
 from ai_researcher.utils import read_json, read_raw
-
-summaries_folder = "data/documents/books/summaries"
 
 
 class DocStatus(Enum):
@@ -16,45 +15,29 @@ class DocStatus(Enum):
     MISSING = "MISSING"
 
 
-def load_documents(book_folder, items_length):
-    docs = []
-    for i in range(items_length):
-        try:
-            doc = read_json(
-                f"{summaries_folder}/{book_folder}/summary_{i}.json"
-            )
-            docs.append((DocStatus.DICT, doc))
-        except FileNotFoundError:
-            try:
-                doc = read_raw(
-                    f"{summaries_folder}/{book_folder}/summary_{i}.fallback.txt"
-                )
-                docs.append((DocStatus.TEXT, doc))
-            except FileNotFoundError:
-                try:
-                    doc = read_raw(
-                        f"{summaries_folder}/{book_folder}/summary_{i}.error.txt"
-                    )
-                    docs.append((DocStatus.ERROR, doc))
-                except FileNotFoundError:
-                    docs.append((DocStatus.MISSING, None))
-    return docs
-
-
-def render(book_folder):
-    if book_folder is None:
-        st.header("Select a book in the sidebar")
+def render_summary(book_folder):
+    try:
+        metadata = read_json(os.path.join(book_folder, "metadata.json"))
+    except IOError as e:
+        st.error("Metadata corrupted: " + str(e))
         return
-
-    metadata = read_json(f"{summaries_folder}/{book_folder}/metadata.json")
 
     st.title(metadata["title"])
     authors = authors_to_string(metadata["authors"])
-    st.text(authors)
+    st.write("Authors: ", authors)
 
-    items_length = 30
+    modal = Modal(
+        "Prompt Used",
+        key="prompt-modal",
+    )
+    open_modal = st.button("See prompt used to generate this summary")
+    if open_modal:
+        modal.open()
+    if modal.is_open():
+        with modal.container():
+            st.text(read_raw(os.path.join(book_folder, "prompt.txt")))
 
-    documents = load_documents(book_folder, items_length)
+    documents = load_documents(book_folder, metadata["items_length"])
 
     st.markdown("## Short Summary")
     for index, (status, doc) in enumerate(documents):
@@ -107,25 +90,41 @@ def authors_to_string(authors):
     )
 
 
-def pick_book():
-    st.sidebar.title("Pick a book")
-    selected_book = None
-    for book_folder in os.listdir(summaries_folder):
-        if os.path.isdir(os.path.join(summaries_folder, book_folder)):
-            clicked = st.sidebar.button(book_folder)
-            if clicked:
-                selected_book = book_folder
-
-    render(selected_book)
-
-
-def st_link(text, href=None, sidebar=False):
-    if href is None:
-        href = text
-
-    destination = st if not sidebar else st.sidebar
-    destination.markdown(f"[{text}]({href})")
+def load_documents(book_folder, items_length):
+    docs = []
+    for i in range(items_length):
+        try:
+            doc = read_json(os.path.join(book_folder, f"summary_{i}.json"))
+            docs.append((DocStatus.DICT, doc))
+        except FileNotFoundError:
+            try:
+                doc = os.path.join(book_folder, f"summary_{i}.fallback.txt")
+                docs.append((DocStatus.TEXT, doc))
+            except FileNotFoundError:
+                try:
+                    doc = os.path.join(book_folder, f"summary_{i}.error.txt")
+                    docs.append((DocStatus.ERROR, doc))
+                except FileNotFoundError:
+                    docs.append((DocStatus.MISSING, None))
+    return docs
 
 
 if __name__ == "__main__":
-    pick_book()
+    st.title("Summary Viewer")
+
+    book_folders = [
+        book_folder
+        for book_folder in os.listdir(paths.summary)
+        if os.path.isdir(os.path.join(paths.summary, book_folder))
+    ]
+
+    selected_book = st.selectbox(
+        "Which book summary would you like to view?",
+        book_folders,
+        index=None,
+        placeholder="Select a book...",
+    )
+
+    if selected_book is not None:
+        st.write("<hr />", unsafe_allow_html=True)
+        render_summary(os.path.join(paths.summary, selected_book))

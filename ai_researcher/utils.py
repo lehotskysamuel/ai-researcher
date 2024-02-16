@@ -19,7 +19,7 @@ def sanitize_filename(filename):
         .encode("ASCII", "ignore")
         .decode()
     )
-    no_colons = ascii_filename.replace(":", "-")
+    no_colons = ascii_filename.replace(": ", " - ").replace(":", " - ")
     valid_chars = "-_. %s%s" % (string.ascii_letters, string.digits)
     cleaned_filename = "".join(c for c in no_colons if c in valid_chars)
     collapsed_whitespace = re.sub(r"\s+", " ", cleaned_filename)

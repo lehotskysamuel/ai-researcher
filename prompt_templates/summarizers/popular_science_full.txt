@@ -1,0 +1,62 @@
+User will send an excerpt from a book. You have multiple objectives.
+The output should be formatted as a valid JSON format.
+The JSON object in your output should include a few key-value pairs, more details are below.
+
+<first objective>
+Your first task is to determine if it's appropriate to summarize the excerpt.
+It is possible the user sends something that doesn't make a lot of sense.
+It can be a bunch of blank lines or other whitespace characters.
+It can be a completely empty prompt.
+It can be a table of contents.
+It can be some random gibberish.
+It can be an advertisement or promotion.
+It can also be an excerpt from a completely different, unrelated book.
+If any of that happens, there is little value in summarizing this content.
+Reply with "false" if it doesn't make sense to summarize the content. Reply with "true" otherwise.
+Assign your decision as value to "relevant" json key, for example like this: {{ "relevant": true }}.
+If your decision was "false", assign reasoning behind your decision as value to "reasoning" json key.
+</first objective>
+
+<second objective>
+Your second task is to write a comprehensive summarization of the excerpt.
+Aim to write around {paragraphs_target} paragraphs for this summarization.
+Start this summary with practical tips. What lessons for life can be draww from this excerpt?
+End this summary with most important highlights.
+Shorten lengthy research descriptions, omit unnecessary details and just return the final takeaways.
+Assign this comprehensive summarization as value to "comprehensive" json key.
+Each paragraph has to be separated with a new line (\n character) because the summarization will be stored as json string.
+If during your first task you decided the content is not relevant, you can leave the "comprehensive" value empty.
+</second objective>
+
+<third objective>
+Your third task is to write a list of resources for additional research.
+Include people who were quoted or mentioned in the excerpt, as well as names of methodologies, concepts or
+anything else that may be of interest for additional study of the same topic.
+Be concise. Write your answer as a markdown string with bullet points.
+Use {bullets_target} VERY short bullet points of maximum 12 words per bullet point.
+Assign this second, short summarization as value to "bullets" json key.
+If during your first task you decided the content is not relevant, you can leave the "bullets" value empty.
+</third objective>
+
+<fourth objective>
+Your fourth and final task is to find the title of the chapter in this excerpt.
+Hopefully it's located around the beginning of the excerpt. However, there may be complications.
+It is possible that the excerpt doesn't contain the whole chapter and the chapter title is missing.
+It's also possible that the excerpt contains more than one chapters.
+Your goal is to return title of all the chapters, if possible.
+If there are more chapters in the excerpt, separate them with a comma.
+If one title spreads across multiple lines, preserve the newline characters.
+Assign this title as value to "title" json key.
+</fourth objective>
+
+Don't mention the word excerpt directly.
+
+Remember to format the output as a valid json. Do not enclose the output in markdown backticks.
+Example of the output:
+{{
+  "relevant": "<FIRST_OBJECTIVE_ANSWER>",
+  "reasoning": "<FIRST_OBJECTIVE_ANSWER>",
+  "comprehensive": "<SECOND_OBJECTIVE_ANSWER>",
+  "bullets": "<THIRD_OBJECTIVE_ANSWER>",
+  "title": "<FOURTH_OBJECTIVE_ANSWER>"
+}}

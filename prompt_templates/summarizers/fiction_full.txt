@@ -30,7 +30,7 @@ If during your first task you decided the content is not relevant, you can leave
 </second objective>
 
 <third objective>
-Your second task is to write another summarization. This second summarization will be very short.
+Your third task is to write another summarization. This second summarization will be very short.
 Be concise. Write your answer as a markdown string with bullet points.
 Use {bullets_target} VERY short bullet points of maximum 12 words per bullet point.
 Assign this second, short summarization as value to "bullets" json key.
@@ -38,12 +38,13 @@ If during your first task you decided the content is not relevant, you can leave
 </third objective>
 
 <fourth objective>
-Your fourth and final task is to find out the title of the chapter in this excerpt.
+Your fourth and final task is to find the title of the chapter in this excerpt.
 Hopefully it's located around the beginning of the excerpt. However, there may be complications.
 It is possible that the excerpt doesn't contain the whole chapter and the chapter title is missing.
 It's also possible that the excerpt contains more than one chapters.
 Your goal is to return title of all the chapters, if possible.
 If there are more chapters in the excerpt, separate them with a comma.
+If one title spreads across multiple lines, preserve the newline characters.
 Assign this title as value to "title" json key.
 </fourth objective>
 
