@@ -16,8 +16,11 @@ class ProseSummarizer:
     def __init__(self, document: Document, summary_instructions: str):
         self.document = document
         self.summary_instructions = summary_instructions
+        self.model = gpt4
 
-    def summarize(self):
+    def summarize(
+        self, paragraphs_target: int = None, bullets_target: int = None
+    ):
         prompt = ChatPromptTemplate.from_messages(
             [
                 SystemMessagePromptTemplate.from_template(
@@ -27,22 +30,24 @@ class ProseSummarizer:
             ]
         )
 
-        model = gpt4
-
         json_parser = SimpleJsonOutputParser()
         resilient_parser = OutputFixingParser.from_llm(
-            parser=json_parser, llm=model, max_retries=1
+            parser=json_parser, llm=self.model, max_retries=1
         )
 
-        chain = prompt | model | resilient_parser
+        chain = prompt | self.model | resilient_parser
 
-        paragraphs_target = math.ceil(
-            model.get_num_tokens(self.document.page_content) / 1100
-        )
+        if paragraphs_target is None:
+            paragraphs_target = math.ceil(
+                self.model.get_num_tokens(self.document.page_content) / 1650
+            )
+        if bullets_target is None:
+            bullets_target = paragraphs_target * 2
+
         response = chain.invoke(
             {
                 "paragraphs_target": paragraphs_target,
-                "bullets_target": paragraphs_target * 2,
+                "bullets_target": bullets_target,
             }
         )
         return response

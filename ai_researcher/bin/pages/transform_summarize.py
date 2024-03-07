@@ -1,4 +1,6 @@
+import math
 import os
+from enum import Enum
 
 import streamlit as st
 from langchain_community.callbacks import get_openai_callback
@@ -7,18 +9,26 @@ from langchain_core.exceptions import OutputParserException
 from streamlit_modal import Modal
 
 from ai_researcher import paths
+from ai_researcher.bin.streamlit_main import sidebar_menu
 from ai_researcher.summarizers.prose_summarizer import ProseSummarizer
 from ai_researcher.utils import (
+    copy_file,
+    dump_json,
+    dump_raw,
     read_json,
     read_raw,
-    dump_raw,
-    dump_json,
-    copy_file,
 )
 
 
+class LengthOption(Enum):
+    SHORT = "Short"
+    NORMAL = "Normal"
+    LONG = "Long"
+
+
 def main():
-    st.title("Summarize book")
+    st.title("Summarize")
+    sidebar_menu()
 
     selected_book = book_selector()
 
@@ -31,6 +41,7 @@ def main():
 
         start_split, end_split = split_selectors(metadata["items_length"])
 
+        selected_length = length_selector()
         selected_prompt = prompt_selector()
 
         if selected_prompt is not None:
@@ -44,6 +55,7 @@ def main():
                     selected_prompt,
                     start_split,
                     end_split,
+                    selected_length,
                 )
 
 
@@ -82,6 +94,19 @@ def split_selectors(items_amount):
     return start_split, end_split
 
 
+def length_selector() -> LengthOption:
+    length_options = [option for option in LengthOption]
+    selected_length = st.selectbox(
+        "How long should the summary be?",
+        length_options,
+        format_func=lambda x: x.value,
+        index=1,
+        placeholder="Choose length...",
+    )
+
+    return selected_length
+
+
 def prompt_selector():
     prompts = [
         prompt
@@ -114,7 +139,12 @@ def prompt_selector():
 
 
 def summarize(
-    selected_book, metadata, summary_instructions, start_split, end_split
+    selected_book,
+    metadata,
+    summary_instructions,
+    start_split,
+    end_split,
+    selected_length: LengthOption,
 ):
     book_folder = os.path.join(paths.splits_raw, selected_book)
 
@@ -139,8 +169,18 @@ def summarize(
 
             summarizer = ProseSummarizer(doc, summary_instructions)
 
+            length_modifier = (
+                1650
+                if selected_length == LengthOption.SHORT
+                else 1100 if selected_length == LengthOption.NORMAL else 550
+            )
+            paragraphs_target = math.ceil(
+                summarizer.model.get_num_tokens(doc.page_content)
+                / length_modifier
+            )
+
             try:
-                summary = summarizer.summarize()
+                summary = summarizer.summarize(paragraphs_target)
                 dump_json(
                     summary,
                     os.path.join(
@@ -183,7 +223,7 @@ def summarize(
             )
 
         st.write("Done!")
-        st.write("<hr>", unsafe_allow_html=True)
+        st.divider()
         st.write("**API Usage:**")
         st.text(cb)
 

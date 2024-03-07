@@ -29,6 +29,19 @@ def sanitize_filename(filename):
     return cleaned_filename.lower()
 
 
+def sanitize_id(text):
+    import unicodedata
+
+    # special chars to ascii (áľťží to altzi etc)
+    ascii_id = (
+        unicodedata.normalize("NFKD", text).encode("ASCII", "ignore").decode()
+    )
+    valid_chars = "_ %s%s" % (string.ascii_letters, string.digits)
+    cleaned_id = "".join(c for c in ascii_id if c in valid_chars)
+    no_whitespace = re.sub(r"\s+", "_", cleaned_id)
+    return no_whitespace.lower()
+
+
 def folder_empty_or_nonexistent(path):
     return (not os.path.exists(path)) or (
         os.path.isdir(path) and not os.listdir(path)
@@ -69,3 +82,14 @@ def read_json(file_path):
 
 def is_blank(text):
     return text is None or text.strip() == ""
+
+
+def authors_to_string(authors):
+    return ", ".join(
+        list(
+            map(
+                lambda author: f"{author['name']} ({author['authorship_type']})",
+                authors,
+            )
+        )
+    )

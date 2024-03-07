@@ -5,7 +5,8 @@ import streamlit as st
 from streamlit_modal import Modal
 
 from ai_researcher import paths
-from ai_researcher.utils import read_json, read_raw, is_blank
+from ai_researcher.bin.streamlit_main import sidebar_menu
+from ai_researcher.utils import authors_to_string, is_blank, read_json, read_raw
 
 
 class DocStatus(Enum):
@@ -61,7 +62,7 @@ def render_summary(book_folder):
             # )
 
         elif status == DocStatus.MISSING:
-            st.sidebar.write(f"Document {index} missing")
+            st.write(f"Document {index} missing")
 
     st.markdown("-----")
     st.markdown("## Full Summary")
@@ -77,17 +78,6 @@ def render_summary(book_folder):
         elif status == DocStatus.TEXT:
             st.markdown("### " + f"Document #{index}")
             st.write(doc)
-
-
-def authors_to_string(authors):
-    return ", ".join(
-        list(
-            map(
-                lambda author: f"{author['name']} ({author['authorship_type']})",
-                authors,
-            )
-        )
-    )
 
 
 def load_documents(book_folder, items_length):
@@ -115,6 +105,7 @@ def load_documents(book_folder, items_length):
 
 if __name__ == "__main__":
     st.title("Summary Viewer")
+    sidebar_menu()
 
     book_folders = [
         book_folder
@@ -130,5 +121,5 @@ if __name__ == "__main__":
     )
 
     if selected_book is not None:
-        st.write("<hr />", unsafe_allow_html=True)
+        st.divider()
         render_summary(os.path.join(paths.summary, selected_book))

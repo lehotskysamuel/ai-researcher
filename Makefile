@@ -12,9 +12,9 @@ dev:
 
 .PHONY: format
 format:
-	poetry run isort .
-	poetry run black .
+	poetry run isort . --skip-glob=frontend/
+	poetry run black . --exclude frontend/
 
 .PHONY: lint
 lint:
-	poetry run flake8 .
+	poetry run flake8 . --exclude=frontend/
