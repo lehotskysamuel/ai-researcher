@@ -12,6 +12,7 @@ def sidebar_menu():
     st.sidebar.header("View")
     st.sidebar.page_link("pages/view_summary.py", label="Summary")
     st.sidebar.page_link("pages/view_retrieve.py", label="Retrieval")
+    st.sidebar.page_link("pages/view_rag.py", label="RAG")
 
 
 if __name__ == "__main__":

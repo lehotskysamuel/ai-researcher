@@ -3,10 +3,10 @@ import tempfile
 
 import streamlit as st
 
-from ai_researcher import paths
 from ai_researcher.bin.streamlit_main import sidebar_menu
 from ai_researcher.document_loaders.epub_loader import EPubLoader
-from ai_researcher.utils import dump_json, sanitize_filename
+from ai_researcher.utils import paths
+from ai_researcher.utils.common_utils import dump_json, sanitize_filename
 
 
 def process_book(book_path, original_file_name):
@@ -46,7 +46,7 @@ def process_book(book_path, original_file_name):
 
 
 if __name__ == "__main__":
-    st.title("Load a New Book")
+    st.title("Load EPUB")
     sidebar_menu()
 
     uploaded_file = st.file_uploader("Select EPUB file", type=["epub"])

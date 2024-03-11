@@ -8,10 +8,10 @@ from langchain_core.documents import Document
 from langchain_core.exceptions import OutputParserException
 from streamlit_modal import Modal
 
-from ai_researcher import paths
 from ai_researcher.bin.streamlit_main import sidebar_menu
 from ai_researcher.summarizers.prose_summarizer import ProseSummarizer
-from ai_researcher.utils import (
+from ai_researcher.utils import paths
+from ai_researcher.utils.common_utils import (
     copy_file,
     dump_json,
     dump_raw,
@@ -27,7 +27,7 @@ class LengthOption(Enum):
 
 
 def main():
-    st.title("Summarize")
+    st.title("Summarize Document")
     sidebar_menu()
 
     selected_book = book_selector()

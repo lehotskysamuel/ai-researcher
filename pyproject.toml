@@ -39,4 +39,4 @@ profile = "black"
 line_length = 80
 
 [tool.poetry.scripts]
-start = 'ai_researcher.bin.main:main'
+start = 'ai_researcher.bin.streamlit_main'

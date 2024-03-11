@@ -4,7 +4,7 @@ install:
 
 .PHONY: start
 start:
-	poetry run start
+	SQLITE_FILE=prod_db.sqlite MILVUS_COLLECTION=ProdCollection poetry run streamlit run ai_researcher/bin/streamlit_main.py
 
 .PHONY: dev
 dev:

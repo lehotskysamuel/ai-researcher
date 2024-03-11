@@ -7,7 +7,7 @@ from ebooklib import epub
 from langchain.document_loaders.base import BaseLoader
 from langchain_core.documents import Document
 
-from ai_researcher.utils import debug
+from ai_researcher.utils.common_utils import debug
 
 
 class EPubLoader(BaseLoader):

@@ -86,10 +86,24 @@ def is_blank(text):
 
 def authors_to_string(authors):
     return ", ".join(
-        list(
-            map(
-                lambda author: f"{author['name']} ({author['authorship_type']})",
-                authors,
-            )
+        map(
+            lambda author: f"{author['name']} ({author['authorship_type']})",
+            authors,
         )
     )
+
+
+def format_time(seconds):
+    hours = int(seconds // 3600)
+    minutes = int((seconds % 3600) // 60)
+    seconds = int(seconds % 60)
+
+    time_parts = []
+    if hours > 0:
+        time_parts.append(f"{hours}h")
+    if minutes > 0:
+        time_parts.append(f"{minutes}m")
+    if seconds > 0 or (hours == 0 and minutes == 0):
+        time_parts.append(f"{seconds}s")
+
+    return " ".join(time_parts)

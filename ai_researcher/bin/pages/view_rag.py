@@ -13,7 +13,9 @@ load_dotenv()
 
 
 def main():
-    st.title("Retrieval Viewer")
+    # TODO ako riesit kontext a last message history pri RAG? Kolko poslednych sprav zobrazit? Pozriet langchain docs (ten chat a github repo)
+
+    st.title("RAG Chatbot")
     sidebar_menu()
 
     query = st.text_input("Query")

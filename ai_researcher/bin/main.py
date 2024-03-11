@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator
 
-from ai_researcher.utils import debug
+from ai_researcher.utils.common_utils import debug
 
 load_dotenv()
 openai_api_key = os.getenv("OPENAI_KEY")

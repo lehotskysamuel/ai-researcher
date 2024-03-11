@@ -4,9 +4,14 @@ from enum import Enum
 import streamlit as st
 from streamlit_modal import Modal
 
-from ai_researcher import paths
 from ai_researcher.bin.streamlit_main import sidebar_menu
-from ai_researcher.utils import authors_to_string, is_blank, read_json, read_raw
+from ai_researcher.utils import paths
+from ai_researcher.utils.common_utils import (
+    authors_to_string,
+    is_blank,
+    read_json,
+    read_raw,
+)
 
 
 class DocStatus(Enum):

@@ -2,22 +2,40 @@ import asyncio
 import math
 import os
 import time
+from datetime import datetime
 
 import streamlit as st
+from dotenv import load_dotenv
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.callbacks import get_openai_callback
 from langchain_community.vectorstores import Milvus
 from langchain_core.documents import Document
 
-from ai_researcher import paths
+import ai_researcher.data.db as db
 from ai_researcher.bin.streamlit_main import sidebar_menu
 from ai_researcher.openai_models import embeddings, embeddings_rate_limiter
-from ai_researcher.utils import authors_to_string, read_json, sanitize_id
+from ai_researcher.utils import paths
+from ai_researcher.utils.common_utils import (
+    authors_to_string,
+    format_time,
+    read_json,
+    sanitize_id,
+)
+
+load_dotenv()
 
 
 def main():
-    st.title("Run Embedding")
+    st.title("Embed Document")
     sidebar_menu()
+
+    st.write("Previously embedded:")
+    st.write(
+        "\n".join(
+            [f"- {embedding_id}" for embedding_id in db.get_all_embedding_ids()]
+        )
+    )
+    st.divider()
 
     selected_book = book_selector()
 
@@ -31,8 +49,8 @@ def main():
         book_folder = os.path.join(paths.splits_raw, selected_book)
         documents = read_documents(book_folder, metadata["items_length"])
 
-        id_prefix = st.text_input(
-            "ID prefix", value=sanitize_id(metadata["title"])
+        embedding_id = st.text_input(
+            "Embedding ID", value=sanitize_id(metadata["title"])
         )
 
         chunk_size = st.number_input(
@@ -54,7 +72,7 @@ def main():
 
         preview_splits(splits)
 
-        asyncio.run(embed_book(splits, id_prefix))
+        asyncio.run(embed_book(chunk_size, chunk_overlap, splits, embedding_id))
 
 
 def book_selector():
@@ -133,8 +151,10 @@ def preview_splits(splits):
 
 
 async def embed_book(
+    chunk_size,
+    chunk_overlap,
     splits,
-    id_prefix,
+    embedding_id,
 ):
     started = st.button("Start")
     st.warning("This will take a lot of time (a few minutes)!")
@@ -145,16 +165,13 @@ async def embed_book(
         st.write("Embedding documents...")
 
         vectorstore = Milvus(
-            # TODO env file
-            collection_name="LangChainCollection",
-            # collection_name="ProdCollection",
+            collection_name=os.getenv("MILVUS_COLLECTION"),
             embedding_function=embeddings,
             auto_id=False,
         )
+        embedding_time = datetime.now()
 
         with get_openai_callback() as cb:
-            start_time = time.time()
-
             completed_counter = {
                 "count": 0
             }  # Using a dict for mutable reference that can be updated across coroutines
@@ -163,7 +180,8 @@ async def embed_book(
             tasks = [
                 embed_rate_limited(
                     i,
-                    id_prefix,
+                    embedding_id,
+                    embedding_time,
                     splits,
                     vectorstore,
                     completed_counter,
@@ -176,12 +194,16 @@ async def embed_book(
 
             await asyncio.gather(*tasks)
 
+            db.add_embedding(
+                embedding_id,
+                embedding_time,
+                map_metadata_for_sqlite(chunk_size, chunk_overlap, len(splits)),
+            )
+
             st.write("Done!")
             progress_bar.progress(1.0)
             st.write(
-                "Total Embedding Time = {:.2f}s".format(
-                    time.time() - start_time
-                )
+                f"Total Embedding Time = {format_time( time.time() - embedding_time.timestamp())}"
             )
 
             st.divider()
@@ -191,7 +213,8 @@ async def embed_book(
 
 async def embed_rate_limited(
     i,
-    id_prefix,
+    embedding_id,
+    embedding_time,
     splits,
     vectorstore,
     completed_counter,
@@ -204,10 +227,14 @@ async def embed_rate_limited(
             split = splits[i]
             await vectorstore.aadd_texts(
                 texts=[split.page_content],
-                metadatas=[map_metadata_for_milvus(split.metadata)],
+                metadatas=[
+                    map_metadata_for_milvus(
+                        split.metadata, embedding_id, embedding_time
+                    )
+                ],
                 ids=[
-                    # book_title _ chapter_index _ split_index, e.g. breath_2_3
-                    f"{id_prefix}_{split.metadata['item_position']}_{i}"
+                    # embedding_id _ chapter_index _ split_index, e.g. breath_2_3
+                    f"{embedding_id}_{split.metadata['item_position']}_{i}"
                 ],
             )
             async with lock:
@@ -223,9 +250,9 @@ async def embed_rate_limited(
             st.error(e)
 
 
-def map_metadata_for_milvus(old_metadata):
+def map_metadata_for_milvus(document_metadata, embedding_id, embedding_time):
 
-    # Metadata:
+    # TODO schema for Metadata:
     # = WEB =
     # url
     # search_id - guid
@@ -244,8 +271,18 @@ def map_metadata_for_milvus(old_metadata):
     # \
 
     return {
-        **old_metadata,
-        "authors": authors_to_string(old_metadata["authors"]),
+        **document_metadata,
+        "embedding_id": embedding_id,
+        "embedding_time": embedding_time.isoformat(),
+        "authors": authors_to_string(document_metadata["authors"]),
+    }
+
+
+def map_metadata_for_sqlite(chunk_size, chunk_overlap, total_chunks):
+    return {
+        "chunk_size": chunk_size,
+        "chunk_overlap": chunk_overlap,
+        "total_chunks": total_chunks,
     }
 
 
