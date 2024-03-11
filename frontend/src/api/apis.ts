@@ -19,6 +19,12 @@ export interface Step2Output {
   }>;
 }
 
+export interface Step3Output {
+  success: boolean;
+  content: string | undefined;
+  error: string | undefined;
+}
+
 export const generateSearchConfigTemplate = async (
   userQuery: string
 ): Promise<Step1Output> => {
@@ -43,6 +49,13 @@ export const startSearch = async (
       search_engine: sec.searchEngine,
       max_results: sec.maxResults,
     })),
+  });
+  return data;
+};
+
+export const downloadContent = async (url: string): Promise<Step3Output> => {
+  const { data } = await apiClient.post("/api/search-wizard/step3", {
+    url,
   });
   return data;
 };

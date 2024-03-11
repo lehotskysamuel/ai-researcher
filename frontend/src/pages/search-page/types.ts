@@ -72,7 +72,7 @@ export type SearchResultDetails =
     }
   | {
       state: "success";
-      htmlPreview: string;
+      content: string;
     }
   | {
       state: "error";
@@ -114,12 +114,13 @@ export type SearchPageAction =
       searchResults: SearchResult[];
     }
   | {
-      type: "UPDATE_SEARCH_RESULT";
-      index: number;
-      searchResult: SearchResult;
+      type: "UPDATE_SEARCH_RESULT_DETAILS";
+      searchResultIndex: number;
+      searchResultDetails: SearchResultDetails;
     }
   | {
       type: "SELECT_SEARCH_RESULTS";
       indexes: number[];
       operation: "add" | "remove" | "set";
-    };
+    }
+  | { type: "DOWNLOAD_CONTENT" };

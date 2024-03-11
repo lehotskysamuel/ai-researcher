@@ -71,8 +71,9 @@ export function searchPageReducer(
       draft.searchState = "success";
       draft.searchResults = action.searchResults;
       break;
-    case "UPDATE_SEARCH_RESULT":
-      draft.searchResults[action.index] = action.searchResult;
+    case "UPDATE_SEARCH_RESULT_DETAILS":
+      draft.searchResults[action.searchResultIndex].details =
+        action.searchResultDetails;
       break;
     case "SELECT_SEARCH_RESULTS":
       draft.searchResults.forEach((searchResult, index) => {
@@ -85,6 +86,13 @@ export function searchPageReducer(
           }
         }
       });
+      break;
+    case "DOWNLOAD_CONTENT":
+      draft.searchResults
+        .filter((sr) => sr.enabled && sr.details.state === "idle")
+        .forEach((searchResult) => {
+          searchResult.details = { state: "loading" };
+        });
       break;
     default:
       assertNever(action);

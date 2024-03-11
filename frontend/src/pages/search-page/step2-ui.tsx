@@ -28,7 +28,7 @@ export function Step2Ui() {
   return (
     <>
       <TypographyH2>
-        <span className="text-muted-foreground">Step 2 / </span>Configure Search
+        <span className="text-muted-foreground">Step 2 / </span>Search
         Parameters
       </TypographyH2>
       <TypographyH3>Configure Search Queries</TypographyH3>

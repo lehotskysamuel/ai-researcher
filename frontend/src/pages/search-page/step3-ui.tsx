@@ -39,10 +39,8 @@ export function Step3Ui() {
     <>
       <hr className="m-8" />
       <TypographyH2>
-        <span className="text-muted-foreground">Step 3 / </span>Select Search
-        Results to Download
+        <span className="text-muted-foreground">Step 3 / </span>Search Results
       </TypographyH2>
-
       <div className="flex flex-row flex-wrap">
         {state.searchResults.map((sr, index) => (
           <SearchResultCard
@@ -58,7 +56,6 @@ export function Step3Ui() {
           />
         ))}
       </div>
-
       <div className="flex space-x-4">
         <Button
           variant={"outline"}
@@ -87,29 +84,33 @@ export function Step3Ui() {
           Select None
         </Button>
       </div>
-
-      {!(someResultsEnabled && allResultsDownloaded) && (
-        <>
-          <Button disabled={!someResultsEnabled} className="my-4">
-            <ArrowDownToLine size={16} className="mr-2" />
-            Download Content
-          </Button>
-          {someResultsLoading && <Loading text="Downloading..." />}
-          Progress:
-          <ProgressWithPercentage
-            finished={downloadedResultsCount}
-            total={selectedResultsCount}
-          />
-        </>
-      )}
-
+      <Button
+        disabled={!someResultsEnabled}
+        className="my-4"
+        onClick={() => dispatch({ type: "DOWNLOAD_CONTENT" })}
+      >
+        <ArrowDownToLine size={16} className="mr-2" />
+        Download Content
+      </Button>
+      {someResultsLoading && <Loading text="Downloading..." />}
+      Progress:
+      <ProgressWithPercentage
+        finished={downloadedResultsCount}
+        total={selectedResultsCount}
+      />
       {someResultsEnabled && allResultsDownloaded && (
         <>
+          <hr className="m-8" />
+          <TypographyH2>
+            <span className="text-muted-foreground">Step 4 / </span>Load Content
+          </TypographyH2>
+          Almost there!
           <Button className="my-4">
             <FolderSearch size={16} className="mr-2" />
             Load Content to Knowledge Base
           </Button>
           <Loading text="Indexing..." />
+          Progress:
           <ProgressWithPercentage finished={3} total={4} />
         </>
       )}
@@ -166,7 +167,7 @@ const SearchResultCard = (props: {
             {searchResult.details.state === "success" && (
               <div className="w-full flex items-center justify-between">
                 <span className="text-green-500">Successful</span>
-                {/* todo dialog searchResult.details.htmlPreview */}
+                {/* todo dialog searchResult.details.content */}
                 <Button variant={"secondary"}>Preview</Button>
               </div>
             )}
