@@ -3,33 +3,55 @@ import os
 
 import streamlit as st
 from dotenv import load_dotenv
+from langchain_community.chat_message_histories import (
+    StreamlitChatMessageHistory,
+)
 from langchain_community.vectorstores import Milvus
+from langchain_core.prompts import (
+    ChatPromptTemplate,
+    SystemMessagePromptTemplate,
+)
+from langchain_core.runnables import RunnablePassthrough
 
 import ai_researcher.data.db as db
 from ai_researcher.bin.streamlit_main import sidebar_menu
-from ai_researcher.openai_models import embeddings
+from ai_researcher.openai_models import embeddings, gpt4
 
 load_dotenv()
 
 
 def main():
     # TODO ako riesit kontext a last message history pri RAG? Kolko poslednych sprav zobrazit? Pozriet langchain docs (ten chat a github repo)
+    # TODO - asi to riesia takto https://python.langchain.com/docs/use_cases/question_answering/chat_history
 
     st.title("RAG Chatbot")
     sidebar_menu()
 
-    query = st.text_input("Query")
     selected_embeddings = embedding_selector()
 
-    k_results = st.number_input(
-        "Number of results",
-        min_value=1,
-        value=10,
-        step=1,
-    )
+    history = StreamlitChatMessageHistory(key="chat_messages")
+    for msg in history.messages:
+        st.chat_message(map_message_type(msg.type)).write(msg.content)
 
-    if query and len(selected_embeddings) > 0:
-        retrieve(query, selected_embeddings, k_results)
+    if question := st.chat_input("Say something"):
+        st.chat_message("user").write(question)
+        get_response(question, selected_embeddings, history)
+
+    reset_button(history)
+
+
+def map_message_type(msg_type):
+    if msg_type == "AIMessageChunk":
+        return "ai"
+    else:
+        return msg_type
+
+
+def reset_button(history):
+    if len(history.messages) > 1:
+        if reset_clicked := st.button("Reset Conversation"):
+            history.clear()
+            st.rerun()
 
 
 def embedding_selector():
@@ -46,41 +68,61 @@ def embedding_selector():
     return selected_embeddings
 
 
-def retrieve(query, embedding_ids, k_results):
+def get_response(question, embedding_ids, history):
+    retrieved_docs = retrieve_relevant_docs(question, embedding_ids)
+    context = "\n---\n".join(doc.page_content for doc in retrieved_docs)
+
+    prompt_template = ChatPromptTemplate.from_messages(
+        [
+            SystemMessagePromptTemplate.from_template(
+                f"""You are an assistant and your task is to answer questions.
+                Use the following pieces of context to answer the question.
+                Always answer based on the context provided.
+                If the context doesn't include information necessary to answer the question,
+                just say there is not enough information to answer the question.
+                
+                Question: {{question}}
+                
+                Context:
+                ======
+                {context}
+                ======
+                 
+                Your Answer: """,
+            ),
+            # MessagesPlaceholder(variable_name="history"),
+            # HumanMessagePromptTemplate.from_template("{question}"),
+        ]
+    )
+
+    base_chain = {"question": RunnablePassthrough()} | prompt_template | gpt4
+
+    response = base_chain.stream(question)
+
+    # chain_with_history = RunnableWithMessageHistory(
+    #     base_chain,
+    #     lambda session_id: history,  # Always return the same instance and ignore session_id
+    #     input_messages_key="question",
+    #     history_messages_key="history",
+    # )
+    # config = {"configurable": {"session_id": "any"}}
+    # response = chain_with_history.stream({"question": question}, config)
+
+    st.chat_message("ai").write_stream(response)
+
+
+def retrieve_relevant_docs(question, embedding_ids):
     vectorstore = Milvus(
         collection_name=os.getenv("MILVUS_COLLECTION"),
         embedding_function=embeddings,
         auto_id=False,
     )
 
-    retrieved_docs = vectorstore.similarity_search_with_score(
-        query, k_results, expr=f"embedding_id in {json.dumps(embedding_ids)}"
+    k_results = 10
+    retrieved_docs = vectorstore.similarity_search(
+        question, k_results, expr=f"embedding_id in {json.dumps(embedding_ids)}"
     )
-
-    # retriever = MultiQueryRetriever.from_llm(
-    #     retriever=vectorstore.as_retriever(
-    #         search_kwargs={
-    #             "k": k_results, # generates k results per each query, then makes a unique union
-    #             "expr": f"embedding_id in {json.dumps(embedding_ids)}",
-    #         }
-    #     ),
-    #     llm=gpt4,
-    # )
-    # retrieved_docs = retriever.invoke(query)
-    # st.write(retrieved_docs)
-
-    for doc, score in retrieved_docs:
-        with st.expander(
-            f"({format_score(score)}) **{doc.metadata['embedding_id']}**  |  *Position*: {doc.metadata['item_position']}"
-        ):
-            st.write(doc.page_content)
-
-
-def format_score(num):
-    if num < 100:
-        return f"{num * 100:.0f}"
-    else:
-        return f"{num/10:.1f}k"
+    return retrieved_docs
 
 
 if __name__ == "__main__":
